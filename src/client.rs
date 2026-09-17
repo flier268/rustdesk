@@ -3985,9 +3985,13 @@ pub fn start_video_thread<F, T>(
                         let mut keyframe = None;
                         if let MediaData::VideoFrame(vf) = data {
                             *discard_queue.write().unwrap() = false;
+                            // Keyframes bypass the queue; drop pre-keyframe
+                            // deltas so they cannot be decoded after this GOP.
+                            let q = video_queue.read().unwrap();
+                            while q.pop().is_some() {}
+                            drop(q);
                             keyframe = Some(*vf);
                         }
-                        let is_keyframe = keyframe.is_some();
                         loop {
                             let frames: Vec<VideoFrame> = if let Some(vf) = keyframe.take() {
                                 vec![vf]
@@ -4062,9 +4066,6 @@ pub fn start_video_thread<F, T>(
                                         _ => {}
                                     }
                                 }
-                            }
-                            if is_keyframe {
-                                break;
                             }
                         }
 

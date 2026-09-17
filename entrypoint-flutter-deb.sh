@@ -23,6 +23,8 @@ cp ./flutter/macos/Runner/bridge_generated.h ./flutter/ios/Runner/bridge_generat
 python3 ./build.py --flutter --hwcodec --unix-file-copy-paste "$@"
 
 if [ -n "${PUID}" ]; then
-  chown -R "${PUID}:${PGID:-${PUID}}" rustdesk*.deb target flutter/build 2>/dev/null || true
+  # Bind-mounted checkout: pub get / codegen / cargo also write under
+  # flutter/.dart_tool, flutter/lib, flutter/{macos,ios}, not only build/.
+  chown -R "${PUID}:${PGID:-${PUID}}" . 2>/dev/null || true
 fi
 ls -lh rustdesk*.deb

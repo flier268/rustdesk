@@ -554,6 +554,7 @@ impl Decoder {
                 }
                 #[cfg(all(feature = "hwcodec", target_os = "linux"))]
                 if !valid
+                    && enable_hwcodec_option()
                     && crate::vaapi_prime::available()
                     && crate::vaapi_prime::egl_dmabuf_ok()
                 {
@@ -593,6 +594,7 @@ impl Decoder {
                 }
                 #[cfg(all(feature = "hwcodec", target_os = "linux"))]
                 if !valid
+                    && enable_hwcodec_option()
                     && crate::vaapi_prime::available()
                     && crate::vaapi_prime::egl_dmabuf_ok()
                 {
