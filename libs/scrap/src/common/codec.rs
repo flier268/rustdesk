@@ -669,6 +669,32 @@ impl Decoder {
         self.valid
     }
 
+    pub fn present_tag(&self, pixelbuffer: bool) -> &'static str {
+        #[cfg(all(feature = "hwcodec", target_os = "linux"))]
+        if self.h264_prime.is_some() || self.h265_prime.is_some() {
+            return "PRIME";
+        }
+        #[cfg(feature = "vram")]
+        if self.h264_vram.is_some() || self.h265_vram.is_some() {
+            return "VRAM";
+        }
+        #[cfg(feature = "hwcodec")]
+        {
+            let ram = self.h264_ram.as_ref().or(self.h265_ram.as_ref());
+            if let Some(d) = ram {
+                if d.info.hwdevice != hwcodec::ffmpeg::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
+                    return if pixelbuffer { "HW" } else { "NV12" };
+                }
+            }
+        }
+        #[cfg(feature = "mediacodec")]
+        if self.h264_media_codec.is_some() || self.h265_media_codec.is_some() {
+            return "MC";
+        }
+        let _ = pixelbuffer;
+        ""
+    }
+
     // rgb [in/out] fmt and stride must be set in ImageRgb
     // `present`: convert the last decoded picture to RGB/texture. False keeps
     // decoder state (needed for P-frames) without the display convert.

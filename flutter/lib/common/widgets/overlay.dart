@@ -562,6 +562,15 @@ class QualityMonitor extends StatelessWidget {
   final QualityMonitorModel qualityMonitorModel;
   QualityMonitor(this.qualityMonitorModel);
 
+  String _codecLine(QualityMonitorData data) {
+    final codec = data.codecFormat ?? '-';
+    final path = data.decodePath;
+    if (path == null || path.isEmpty) {
+      return codec;
+    }
+    return '$codec $path';
+  }
+
   Widget _row(String info, String? value, {Color? rightColor}) {
     return Row(
       children: [
@@ -603,8 +612,7 @@ class QualityMonitor extends StatelessWidget {
                           rightColor: Colors.green),
                       _row("Target Bitrate",
                           "${qualityMonitorModel.data.targetBitrate ?? '-'}kb"),
-                      _row(
-                          "Codec", qualityMonitorModel.data.codecFormat ?? '-'),
+                      _row("Codec", _codecLine(qualityMonitorModel.data)),
                       _row("Chroma", qualityMonitorModel.data.chroma ?? '-'),
                       if (qualityMonitorModel.webrtcTransport != null)
                         _row("Transport",

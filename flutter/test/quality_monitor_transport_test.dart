@@ -25,4 +25,24 @@ void main() {
     expect(isWeb, isFalse);
     expect(model.webrtcTransport, isNull);
   });
+
+  test('the codec row keeps the bitstream name and a decode-path suffix', () {
+    final ffi = _FakeFFI();
+    final model = QualityMonitorModel(WeakReference(ffi));
+    model.updateQualityStatus({
+      'codec_format': 'H264',
+      'decode_path': 'PRIME',
+    });
+    expect(model.data.codecFormat, 'H264');
+    expect(model.data.decodePath, 'PRIME');
+    model.updateQualityStatus({
+      'codec_format': 'VP9',
+      'decode_path': '',
+    });
+    expect(model.data.codecFormat, 'VP9');
+    expect(model.data.decodePath, isNull);
+    model.updateQualityStatus({'delay': '12'});
+    expect(model.data.decodePath, isNull);
+    expect(model.data.codecFormat, 'VP9');
+  });
 }

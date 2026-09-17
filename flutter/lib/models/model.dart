@@ -3589,6 +3589,7 @@ class QualityMonitorData {
   String? targetBitrate;
   String? codecFormat;
   String? chroma;
+  String? decodePath;
 }
 
 class QualityMonitorModel with ChangeNotifier {
@@ -3659,6 +3660,9 @@ class QualityMonitorModel with ChangeNotifier {
       if (evt.containsKey('codec_format') &&
           (evt['codec_format'] as String).isNotEmpty) {
         _data.codecFormat = evt['codec_format'];
+        // Same 1Hz packet as codec; empty means software (clear a stale PRIME/NV12 tag).
+        final path = evt['decode_path'] as String? ?? '';
+        _data.decodePath = path.isEmpty ? null : path;
       }
       if (evt.containsKey('chroma') && (evt['chroma'] as String).isNotEmpty) {
         _data.chroma = evt['chroma'];

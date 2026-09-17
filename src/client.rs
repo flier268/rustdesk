@@ -3961,6 +3961,7 @@ pub fn start_video_thread<F, T>(
     fps: Arc<RwLock<Option<usize>>>,
     chroma: Arc<RwLock<Option<Chroma>>>,
     discard_queue: Arc<RwLock<bool>>,
+    decode_path: Arc<RwLock<Option<String>>>,
     video_callback: F,
 ) where
     F: 'static + FnMut(usize, &mut scrap::ImageRgb, *mut c_void, bool) + Send,
@@ -4049,6 +4050,12 @@ pub fn start_video_thread<F, T>(
                                                 last_chroma = tmp_chroma;
                                                 *chroma.write().unwrap() = tmp_chroma;
                                             }
+                                            let tag = handler.decoder.present_tag(pixelbuffer);
+                                            *decode_path.write().unwrap() = if tag.is_empty() {
+                                                None
+                                            } else {
+                                                Some(tag.to_string())
+                                            };
 
                                             fps_calculate(
                                                 &mut skip_beginning,

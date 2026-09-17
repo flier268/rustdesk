@@ -386,11 +386,15 @@ impl<T: InvokeUiSession> Remote<T> {
                             } else {
                                 Some(self.video_format.clone())
                             };
+                            let decode_path = self.video_threads.values().find_map(|t| {
+                                t.decode_path.read().unwrap().clone()
+                            });
                             self.handler.update_quality_status(QualityStatus {
                                 speed: Some(speed),
                                 fps,
                                 chroma,
                                 codec_format,
+                                decode_path,
                                 ..Default::default()
                             });
                         }
@@ -2485,6 +2489,7 @@ impl<T: InvokeUiSession> Remote<T> {
         let decode_fps = Arc::new(RwLock::new(None));
         let frame_count = Arc::new(RwLock::new(0));
         let discard_queue = Arc::new(RwLock::new(false));
+        let decode_path = Arc::new(RwLock::new(None));
         let video_thread = VideoThread {
             video_queue: video_queue.clone(),
             video_sender,
@@ -2492,6 +2497,7 @@ impl<T: InvokeUiSession> Remote<T> {
             frame_count: frame_count.clone(),
             fps_control: Default::default(),
             discard_queue: discard_queue.clone(),
+            decode_path: decode_path.clone(),
         };
         let handler = self.handler.ui_handler.clone();
         crate::client::start_video_thread(
@@ -2502,6 +2508,7 @@ impl<T: InvokeUiSession> Remote<T> {
             decode_fps,
             self.chroma.clone(),
             discard_queue,
+            decode_path,
             move |display: usize,
                   data: &mut scrap::ImageRgb,
                   _texture: *mut c_void,
@@ -2595,6 +2602,7 @@ struct VideoThread {
     frame_count: Arc<RwLock<usize>>,
     discard_queue: Arc<RwLock<bool>>,
     fps_control: FpsControl,
+    decode_path: Arc<RwLock<Option<String>>>,
 }
 
 impl Drop for VideoThread {

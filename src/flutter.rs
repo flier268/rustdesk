@@ -803,6 +803,10 @@ impl InvokeUiSession for FlutterHandler {
                     &status.codec_format.map_or(NULL, |it| it.to_string()),
                 ),
                 ("chroma", &status.chroma.map_or(NULL, |it| it.to_string())),
+                (
+                    "decode_path",
+                    &status.decode_path.map_or(NULL, |it| it),
+                ),
             ],
             &[],
         );
